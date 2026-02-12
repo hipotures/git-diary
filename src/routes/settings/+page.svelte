@@ -1,10 +1,19 @@
 <script lang="ts">
 	import { Moon, Sun } from 'lucide-svelte';
 	import { theme } from '$lib/stores/theme';
+
+	interface PageData {
+		version: string;
+	}
+
+	let { data }: { data: PageData } = $props();
 </script>
 
 <div class="settings-page">
-	<h1>Settings</h1>
+	<div class="settings-header">
+		<h1>Settings</h1>
+		<span class="version">v{data.version}</span>
+	</div>
 
 	<section class="settings-section">
 		<h2>Appearance</h2>
@@ -41,6 +50,27 @@
 <style>
 	.settings-page {
 		max-width: 800px;
+	}
+
+	.settings-header {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+		margin-bottom: var(--space-lg);
+	}
+
+	.settings-header h1 {
+		margin: 0;
+	}
+
+	.version {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary);
+		font-weight: 500;
+		padding: var(--space-xs) var(--space-sm);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
 	}
 
 	.settings-section {
