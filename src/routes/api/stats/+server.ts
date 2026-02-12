@@ -9,10 +9,9 @@ import {
 import type { RequestHandler } from './$types.js';
 import type { ComparisonStats } from '$lib/domain/types.js';
 
-export const GET: RequestHandler = ({ url }) => {
-	const periodParam = url.searchParams.get('period') || '90d';
-	const period = periodParam === '30d' ? '30d' : '90d';
-	const days = period === '30d' ? 30 : 90;
+export const GET: RequestHandler = () => {
+	const period = '90d';
+	const days = 90;
 
 	const allData = getAllDailyData(days);
 	const today = new Date().toISOString().slice(0, 10);
@@ -39,3 +38,5 @@ export const GET: RequestHandler = ({ url }) => {
 
 	return json(stats);
 };
+
+export const prerender = true;

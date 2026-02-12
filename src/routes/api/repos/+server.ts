@@ -6,3 +6,5 @@ export const GET: RequestHandler = () => {
 	const repos = getReposWithStats();
 	return json(repos);
 };
+
+export const prerender = true;

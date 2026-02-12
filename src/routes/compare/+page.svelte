@@ -5,6 +5,7 @@
 
 	let { data }: { data: PageData } = $props();
 
+	// Note: In static export, period toggle is disabled (always 90d)
 	const totalCommits = $derived(data.stats.repos.reduce((sum, r) => sum + r.totalCommits, 0));
 	const activeRepos = $derived(data.stats.repos.filter((r) => r.totalCommits > 0).length);
 	const avgCommitsPerRepo = $derived(
@@ -14,23 +15,7 @@
 </script>
 
 <div class="header">
-	<h1>Repository Comparison</h1>
-	<div class="period-toggle">
-		<a
-			href="/compare?period=30d"
-			class="period-btn"
-			class:active={data.stats.period === '30d'}
-		>
-			30 days
-		</a>
-		<a
-			href="/compare?period=90d"
-			class="period-btn"
-			class:active={data.stats.period === '90d'}
-		>
-			90 days
-		</a>
-	</div>
+	<h1>Repository Comparison (90 days)</h1>
 </div>
 
 <div class="metrics-grid">
