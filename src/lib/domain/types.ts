@@ -35,5 +35,5 @@ export interface ComparisonRepo {
 
 export interface ComparisonStats {
 	repos: ComparisonRepo[];
-	period: '30d' | '90d';
+	period: '7d' | '30d' | '90d' | '180d' | '360d' | 'all';
 }

@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { Settings } from 'lucide-svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import DateRangeSelector from '$lib/components/DateRangeSelector.svelte';
 	import { theme } from '$lib/stores/theme';
 
 	let { children, data } = $props();
@@ -21,6 +22,7 @@
 				<span class="nav-owner">{data.owner}</span>
 			{/if}
 		</div>
+		<DateRangeSelector />
 		<div class="nav-links">
 			<ThemeToggle />
 			<a href="/settings" class="settings-link" aria-label="Settings">
@@ -50,6 +52,7 @@
 	.nav-inner {
 		display: flex;
 		align-items: center;
+		gap: var(--space-xl);
 		justify-content: space-between;
 	}
 

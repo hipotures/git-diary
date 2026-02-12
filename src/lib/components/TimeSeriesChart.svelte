@@ -26,7 +26,10 @@
 		const dataMap = new Map(daily.map((d) => [d.day, d.commits]));
 		const fullData: Array<{ day: string; commits: number }> = [];
 
-		for (let i = 89; i >= 0; i--) {
+		// Calculate the number of days from the data
+		const numDays = daily.length > 0 ? daily.length : 90;
+
+		for (let i = numDays - 1; i >= 0; i--) {
 			const date = new Date(today);
 			date.setUTCDate(date.getUTCDate() - i);
 			const day = date.toISOString().slice(0, 10);
@@ -52,7 +55,8 @@
 				axisLabel: {
 					color: colors.text,
 					fontSize: 10,
-					interval: 'auto',
+					// Adaptive label interval based on range
+					interval: numDays <= 30 ? 2 : numDays <= 90 ? 6 : numDays <= 180 ? 14 : 30,
 					formatter: (value: string) => {
 						const parts = value.split('-');
 						return `${parts[1]}-${parts[2]}`;

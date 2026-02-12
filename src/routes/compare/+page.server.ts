@@ -9,9 +9,9 @@ import type { PageServerLoad } from './$types.js';
 import type { ComparisonStats } from '$lib/domain/types.js';
 
 export const load: PageServerLoad = () => {
-	// Default to 90d for static prerender
-	const period = '90d';
-	const days = 90;
+	// Fetch 360 days for static prerender (will be filtered client-side)
+	const period = '360d';
+	const days = 360;
 
 	const allData = getAllDailyData(days);
 	const today = new Date().toISOString().slice(0, 10);
@@ -36,7 +36,7 @@ export const load: PageServerLoad = () => {
 		})
 	};
 
-	return { stats };
+	return { stats, allData };
 };
 
 export const prerender = true;

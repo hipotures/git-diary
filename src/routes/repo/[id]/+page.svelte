@@ -1,9 +1,12 @@
 <script lang="ts">
 	import TimeSeriesChart from '$lib/components/TimeSeriesChart.svelte';
 	import CalendarHeatmap from '$lib/components/CalendarHeatmap.svelte';
+	import { dateRange, filterDailyData, getRangeLabel } from '$lib/stores/dateRange';
 	import type { PageData } from './$types.js';
 
 	let { data }: { data: PageData } = $props();
+
+	const filteredDaily = $derived(filterDailyData(data.daily, $dateRange));
 </script>
 
 <div class="repo-header">
@@ -12,16 +15,16 @@
 </div>
 
 <section class="chart-section">
-	<h2>Commit Activity (90 days)</h2>
+	<h2>Commit Activity ({getRangeLabel($dateRange)})</h2>
 	<div class="chart-container">
-		<TimeSeriesChart daily={data.daily} />
+		<TimeSeriesChart daily={filteredDaily} />
 	</div>
 </section>
 
 <section class="chart-section">
-	<h2>Calendar Heatmap</h2>
+	<h2>Calendar Heatmap ({getRangeLabel($dateRange)})</h2>
 	<div class="chart-container">
-		<CalendarHeatmap daily={data.daily} />
+		<CalendarHeatmap daily={filteredDaily} />
 	</div>
 </section>
 

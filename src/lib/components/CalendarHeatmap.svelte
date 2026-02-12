@@ -20,11 +20,12 @@
 			const colors = getEChartsColors(currentTheme);
 			chart = echarts.init(chartDom, getEChartsTheme(currentTheme));
 
-		// Calculate date range (90 days)
+		// Calculate date range dynamically from data
 		const today = new Date();
 		today.setUTCHours(0, 0, 0, 0);
+		const numDays = daily.length > 0 ? daily.length : 90;
 		const start = new Date(today);
-		start.setUTCDate(start.getUTCDate() - 89);
+		start.setUTCDate(start.getUTCDate() - (numDays - 1));
 
 		const startDate = start.toISOString().slice(0, 10);
 		const endDate = today.toISOString().slice(0, 10);
@@ -55,7 +56,8 @@
 			},
 			calendar: {
 				range: [startDate, endDate],
-				cellSize: ['auto', 14],
+				// Adaptive cell size based on range
+				cellSize: ['auto', numDays <= 90 ? 14 : numDays <= 180 ? 12 : numDays <= 360 ? 10 : 8],
 				splitLine: {
 					show: true,
 					lineStyle: {
@@ -63,14 +65,16 @@
 						width: 2
 					}
 				},
-				yearLabel: { show: false },
+				// Show year label for longer ranges
+				yearLabel: { show: numDays > 180 },
 				monthLabel: {
 					nameMap: 'en',
 					fontSize: 11,
 					color: colors.text
 				},
 				dayLabel: {
-					nameMap: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+					// Abbreviate day labels for longer ranges
+					nameMap: numDays > 180 ? ['S', 'M', 'T', 'W', 'T', 'F', 'S'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 					fontSize: 10,
 					color: colors.text
 				},

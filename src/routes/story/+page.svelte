@@ -1,15 +1,28 @@
 <script lang="ts">
 	import StorySection from '$lib/components/StorySection.svelte';
+	import { dateRange, filterDailyData, getRangeLabel, getDaysFromRange } from '$lib/stores/dateRange';
+	import { generateStorySummary } from '$lib/domain/stats';
 	import type { PageData } from './$types.js';
 
 	let { data }: { data: PageData } = $props();
+
+	// Generate story based on selected date range
+	const story = $derived.by(() => {
+		const days = getDaysFromRange($dateRange) || 360;
+		const filteredData = data.allData.map((item) => ({
+			...item,
+			daily: filterDailyData(item.daily, $dateRange)
+		}));
+		return generateStorySummary(filteredData, days);
+	});
+
+	const period = $derived($dateRange === 'all' ? 'all' : `${$dateRange}d`);
 </script>
 
 <h1>Build Story</h1>
-<p class="subtitle">A narrative view of your development activity</p>
+<p class="subtitle">A narrative view of your development activity ({getRangeLabel($dateRange)})</p>
 
-<StorySection story={data.story30d} period="30d" />
-<StorySection story={data.story90d} period="90d" />
+<StorySection {story} {period} />
 
 <style>
 	.subtitle {

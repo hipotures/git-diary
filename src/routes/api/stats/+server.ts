@@ -10,8 +10,8 @@ import type { RequestHandler } from './$types.js';
 import type { ComparisonStats } from '$lib/domain/types.js';
 
 export const GET: RequestHandler = () => {
-	const period = '90d';
-	const days = 90;
+	const period = '360d';
+	const days = 360;
 
 	const allData = getAllDailyData(days);
 	const today = new Date().toISOString().slice(0, 10);

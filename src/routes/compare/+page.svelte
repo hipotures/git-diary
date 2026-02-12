@@ -1,21 +1,56 @@
 <script lang="ts">
 	import StatsTable from '$lib/components/StatsTable.svelte';
 	import MetricCard from '$lib/components/MetricCard.svelte';
+	import { dateRange, filterDailyData, getRangeLabel, getDaysFromRange } from '$lib/stores/dateRange';
+	import {
+		calculateCurrentStreak,
+		calculateLongestStreak,
+		calculateMaxGap,
+		calculateRegularity
+	} from '$lib/domain/stats';
 	import type { PageData } from './$types.js';
+	import type { ComparisonStats } from '$lib/domain/types';
 
 	let { data }: { data: PageData } = $props();
 
-	// Note: In static export, period toggle is disabled (always 90d)
-	const totalCommits = $derived(data.stats.repos.reduce((sum, r) => sum + r.totalCommits, 0));
-	const activeRepos = $derived(data.stats.repos.filter((r) => r.totalCommits > 0).length);
+	// Recalculate stats based on selected date range
+	const filteredStats = $derived.by(() => {
+		const today = new Date().toISOString().slice(0, 10);
+		const days = getDaysFromRange($dateRange) || 360;
+
+		const stats: ComparisonStats = {
+			period: $dateRange === 'all' ? 'all' : `${$dateRange}d`,
+			repos: data.allData.map((item) => {
+				const filteredDaily = filterDailyData(item.daily, $dateRange);
+				const totalCommits = filteredDaily.reduce((sum, d) => sum + d.commits, 0);
+				const activeDays = filteredDaily.filter((d) => d.commits > 0).length;
+
+				return {
+					id: item.repo.id,
+					owner: item.repo.owner,
+					name: item.repo.name,
+					totalCommits,
+					activeDays,
+					regularity: calculateRegularity(filteredDaily, days),
+					maxGap: calculateMaxGap(filteredDaily),
+					currentStreak: calculateCurrentStreak(filteredDaily, today),
+					longestStreak: calculateLongestStreak(filteredDaily)
+				};
+			})
+		};
+		return stats;
+	});
+
+	const totalCommits = $derived(filteredStats.repos.reduce((sum, r) => sum + r.totalCommits, 0));
+	const activeRepos = $derived(filteredStats.repos.filter((r) => r.totalCommits > 0).length);
 	const avgCommitsPerRepo = $derived(
 		activeRepos > 0 ? Math.round(totalCommits / activeRepos) : 0
 	);
-	const topStreak = $derived(Math.max(...data.stats.repos.map((r) => r.longestStreak), 0));
+	const topStreak = $derived(Math.max(...filteredStats.repos.map((r) => r.longestStreak), 0));
 </script>
 
 <div class="header">
-	<h1>Repository Comparison (90 days)</h1>
+	<h1>Repository Comparison ({getRangeLabel($dateRange)})</h1>
 </div>
 
 <div class="metrics-grid">
@@ -27,7 +62,7 @@
 
 <section class="table-section">
 	<h2>Statistics by Repository</h2>
-	<StatsTable repos={data.stats.repos} period={data.stats.period} />
+	<StatsTable repos={filteredStats.repos} period={filteredStats.period} />
 </section>
 
 <style>
@@ -36,34 +71,6 @@
 		align-items: center;
 		justify-content: space-between;
 		margin-bottom: var(--space-xl);
-	}
-
-	.period-toggle {
-		display: flex;
-		gap: var(--space-xs);
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius);
-		padding: 2px;
-	}
-
-	.period-btn {
-		padding: var(--space-xs) var(--space-md);
-		border-radius: calc(var(--radius) - 2px);
-		font-size: 0.875rem;
-		color: var(--color-text-secondary);
-		text-decoration: none;
-		transition: all 0.15s;
-	}
-
-	.period-btn:hover {
-		color: var(--color-text);
-		background: var(--color-surface-hover);
-	}
-
-	.period-btn.active {
-		color: var(--color-text);
-		background: var(--color-accent);
 	}
 
 	.metrics-grid {

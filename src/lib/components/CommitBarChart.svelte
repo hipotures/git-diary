@@ -2,15 +2,29 @@
 	import { onMount, onDestroy } from 'svelte';
 	import type { RepoSummary } from '$lib/domain/types.js';
 	import { theme } from '$lib/stores/theme';
+	import { dateRange, type DateRange } from '$lib/stores/dateRange';
 	import { getEChartsTheme, getEChartsColors } from '$lib/utils/echarts-themes';
 
 	let { repos }: { repos: RepoSummary[] } = $props();
 
 	let chartDom: HTMLDivElement;
 	let chart: any;
-	let unsubscribe: (() => void) | undefined;
+	let unsubscribeTheme: (() => void) | undefined;
+	let unsubscribeDateRange: (() => void) | undefined;
 
-	const initChart = (currentTheme: 'light' | 'dark') => {
+	// Get commit count for selected date range
+	function getCommitCount(repo: RepoSummary, range: DateRange): number {
+		switch (range) {
+			case 7: return repo.commits7d;
+			case 30: return repo.commits30d;
+			case 90: return repo.commits90d;
+			case 180: return repo.commits180d;
+			case 360: return repo.commits360d;
+			case 'all': return repo.commitsAll;
+		}
+	}
+
+	const initChart = (currentTheme: 'light' | 'dark', currentRange: DateRange) => {
 		import('echarts').then((echarts) => {
 			// Dispose existing chart if any
 			if (chart) {
@@ -20,7 +34,7 @@
 			const colors = getEChartsColors(currentTheme);
 			chart = echarts.init(chartDom, getEChartsTheme(currentTheme));
 
-			const sorted = [...repos].sort((a, b) => b.commits90d - a.commits90d);
+			const sorted = [...repos].sort((a, b) => getCommitCount(b, currentRange) - getCommitCount(a, currentRange));
 
 			chart.setOption({
 			backgroundColor: 'transparent',
@@ -53,27 +67,13 @@
 			},
 			series: [
 				{
-					name: '7d',
+					name: 'Commits',
 					type: 'bar',
-					stack: 'commits',
-					data: sorted.map((r) => r.commits7d),
-					itemStyle: { color: colors.accent },
-					barMaxWidth: 40
-				},
-				{
-					name: '30d',
-					type: 'bar',
-					stack: 'commits',
-					data: sorted.map((r) => r.commits30d - r.commits7d),
-					itemStyle: { color: colors.accentAlpha66 },
-					barMaxWidth: 40
-				},
-				{
-					name: '90d',
-					type: 'bar',
-					stack: 'commits',
-					data: sorted.map((r) => r.commits90d - r.commits30d),
-					itemStyle: { color: colors.accentAlpha33 },
+					data: sorted.map((r) => getCommitCount(r, currentRange)),
+					itemStyle: {
+						color: colors.accent,
+						borderRadius: [2, 2, 0, 0]
+					},
 					barMaxWidth: 40
 				}
 			]
@@ -85,16 +85,22 @@
 	};
 
 	onMount(() => {
-		initChart($theme);
-		unsubscribe = theme.subscribe((newTheme) => {
+		initChart($theme, $dateRange);
+		unsubscribeTheme = theme.subscribe((newTheme) => {
 			if (chart) {
-				initChart(newTheme);
+				initChart(newTheme, $dateRange);
+			}
+		});
+		unsubscribeDateRange = dateRange.subscribe((newRange) => {
+			if (chart) {
+				initChart($theme, newRange);
 			}
 		});
 	});
 
 	onDestroy(() => {
-		if (unsubscribe) unsubscribe();
+		if (unsubscribeTheme) unsubscribeTheme();
+		if (unsubscribeDateRange) unsubscribeDateRange();
 		if (chart) chart.dispose();
 	});
 </script>

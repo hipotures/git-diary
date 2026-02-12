@@ -1,6 +1,7 @@
 <script lang="ts">
 	import RepoCard from '$lib/components/RepoCard.svelte';
 	import CommitBarChart from '$lib/components/CommitBarChart.svelte';
+	import { dateRange, getRangeLabel } from '$lib/stores/dateRange';
 	import type { PageData } from './$types.js';
 
 	let { data }: { data: PageData } = $props();
@@ -15,7 +16,7 @@
 </div>
 
 <section class="chart-section">
-	<h2>Commits Overview (90 days)</h2>
+	<h2>Commits Overview ({getRangeLabel($dateRange)})</h2>
 	<div class="chart-container">
 		<CommitBarChart repos={data.repos} />
 	</div>
