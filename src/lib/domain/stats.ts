@@ -137,7 +137,7 @@ export function generateStorySummary(
 			if (d.commits > 0) {
 				const existing = dailyTotals.get(d.day) || { commits: 0, repos: new Set() };
 				existing.commits += d.commits;
-				existing.repos.add(`${item.repo.owner}/${item.repo.name}`);
+				existing.repos.add(item.repo.name);
 				dailyTotals.set(d.day, existing);
 			}
 		});
