@@ -27,7 +27,7 @@
 			},
 			xAxis: {
 				type: 'category',
-				data: sorted.map((r) => `${r.owner}/${r.name}`),
+				data: sorted.map((r) => r.name),
 				axisLabel: {
 					color: '#7d8590',
 					fontSize: 11,
