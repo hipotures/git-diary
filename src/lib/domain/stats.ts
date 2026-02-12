@@ -77,3 +77,96 @@ export function calculateRegularity(daily: DailyEntry[], periodDays: number): nu
 	const activeDays = daily.filter((d) => d.commits > 0).length;
 	return activeDays / periodDays;
 }
+
+export interface StorySummary {
+	totalCommits: number;
+	activeDays: number;
+	totalDays: number;
+	mostActiveRepo: { owner: string; name: string; commits: number } | null;
+	mostConsistentRepo: { owner: string; name: string; regularity: number } | null;
+	longestStreak: number;
+	highlights: Array<{ day: string; commits: number; repos: string[] }>;
+}
+
+export function generateStorySummary(
+	allData: Array<{ repo: { id: number; owner: string; name: string }; daily: DailyEntry[] }>,
+	periodDays: number
+): StorySummary {
+	// Total commits across all repos
+	const totalCommits = allData.reduce(
+		(sum, item) => sum + item.daily.reduce((s, d) => s + d.commits, 0),
+		0
+	);
+
+	// Collect all unique active days
+	const allActiveDays = new Set<string>();
+	allData.forEach((item) => {
+		item.daily.filter((d) => d.commits > 0).forEach((d) => allActiveDays.add(d.day));
+	});
+
+	// Most active repo
+	const repoCommits = allData.map((item) => ({
+		owner: item.repo.owner,
+		name: item.repo.name,
+		commits: item.daily.reduce((sum, d) => sum + d.commits, 0)
+	}));
+	const mostActiveRepo = repoCommits.reduce(
+		(max, r) => (r.commits > max.commits ? r : max),
+		repoCommits[0] || { owner: '', name: '', commits: 0 }
+	);
+
+	// Most consistent repo
+	const repoRegularity = allData.map((item) => ({
+		owner: item.repo.owner,
+		name: item.repo.name,
+		regularity: calculateRegularity(item.daily, periodDays)
+	}));
+	const mostConsistentRepo = repoRegularity.reduce(
+		(max, r) => (r.regularity > max.regularity ? r : max),
+		repoRegularity[0] || { owner: '', name: '', regularity: 0 }
+	);
+
+	// Longest streak across all repos
+	const allStreaks = allData.map((item) => calculateLongestStreak(item.daily));
+	const longestStreak = Math.max(...allStreaks, 0);
+
+	// Highlights - days with unusual activity (> mean + 1.5 * stddev)
+	const dailyTotals = new Map<string, { commits: number; repos: Set<string> }>();
+	allData.forEach((item) => {
+		item.daily.forEach((d) => {
+			if (d.commits > 0) {
+				const existing = dailyTotals.get(d.day) || { commits: 0, repos: new Set() };
+				existing.commits += d.commits;
+				existing.repos.add(`${item.repo.owner}/${item.repo.name}`);
+				dailyTotals.set(d.day, existing);
+			}
+		});
+	});
+
+	const commitCounts = Array.from(dailyTotals.values()).map((d) => d.commits);
+	const mean = commitCounts.reduce((sum, c) => sum + c, 0) / commitCounts.length || 0;
+	const variance =
+		commitCounts.reduce((sum, c) => sum + Math.pow(c - mean, 2), 0) / commitCounts.length || 0;
+	const stddev = Math.sqrt(variance);
+	const threshold = mean + 1.5 * stddev;
+
+	const highlights = Array.from(dailyTotals.entries())
+		.filter(([_, data]) => data.commits > threshold)
+		.map(([day, data]) => ({
+			day,
+			commits: data.commits,
+			repos: Array.from(data.repos)
+		}))
+		.sort((a, b) => b.commits - a.commits)
+		.slice(0, 5);
+
+	return {
+		totalCommits,
+		activeDays: allActiveDays.size,
+		totalDays: periodDays,
+		mostActiveRepo: mostActiveRepo.commits > 0 ? mostActiveRepo : null,
+		mostConsistentRepo: mostConsistentRepo.regularity > 0 ? mostConsistentRepo : null,
+		longestStreak,
+		highlights
+	};
+}

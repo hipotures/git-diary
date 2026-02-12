@@ -31,12 +31,13 @@ export function sortRepos(
 		}
 
 		if (typeof aVal === 'string' && typeof bVal === 'string') {
-			return direction === 'asc'
-				? aVal.localeCompare(bVal)
-				: bVal.localeCompare(aVal);
+			return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
 		}
 
-		return direction === 'asc' ? aVal - bVal : bVal - aVal;
+		// Both must be numbers at this point
+		const aNum = aVal as number;
+		const bNum = bVal as number;
+		return direction === 'asc' ? aNum - bNum : bNum - aNum;
 	});
 
 	return sorted;

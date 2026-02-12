@@ -6,13 +6,13 @@
 
 	let chartDom: HTMLDivElement;
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		const chart = echarts.init(chartDom, 'dark');
+	onMount(() => {
+		import('echarts').then((echarts) => {
+			const chart = echarts.init(chartDom, 'dark');
 
-		const sorted = [...repos].sort((a, b) => b.commits90d - a.commits90d);
+			const sorted = [...repos].sort((a, b) => b.commits90d - a.commits90d);
 
-		chart.setOption({
+			chart.setOption({
 			backgroundColor: 'transparent',
 			tooltip: {
 				trigger: 'axis',
@@ -69,13 +69,9 @@
 			]
 		});
 
-		const resizeObserver = new ResizeObserver(() => chart.resize());
-		resizeObserver.observe(chartDom);
-
-		return () => {
-			resizeObserver.disconnect();
-			chart.dispose();
-		};
+			const resizeObserver = new ResizeObserver(() => chart.resize());
+			resizeObserver.observe(chartDom);
+		});
 	});
 </script>
 

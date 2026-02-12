@@ -6,9 +6,9 @@
 
 	let chartDom: HTMLDivElement;
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		const chart = echarts.init(chartDom, 'dark');
+	onMount(() => {
+		import('echarts').then((echarts) => {
+			const chart = echarts.init(chartDom, 'dark');
 
 		// Fill in missing days with 0 commits
 		const today = new Date();
@@ -70,13 +70,9 @@
 			]
 		});
 
-		const resizeObserver = new ResizeObserver(() => chart.resize());
-		resizeObserver.observe(chartDom);
-
-		return () => {
-			resizeObserver.disconnect();
-			chart.dispose();
-		};
+			const resizeObserver = new ResizeObserver(() => chart.resize());
+			resizeObserver.observe(chartDom);
+		});
 	});
 </script>
 
