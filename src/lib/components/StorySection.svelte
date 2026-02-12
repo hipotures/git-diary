@@ -23,9 +23,8 @@
 	{#if story.mostActiveRepo}
 		<div class="card highlight-card">
 			<h3>Most Active Repository</h3>
-			<p class="repo-name">
-				<span class="text-secondary">{story.mostActiveRepo.owner}/</span>
-				<span class="text-mono">{story.mostActiveRepo.name}</span>
+			<p class="repo-name text-mono">
+				{story.mostActiveRepo.name}
 			</p>
 			<p class="metric">
 				<span class="value">{story.mostActiveRepo.commits}</span>
@@ -37,9 +36,8 @@
 	{#if story.mostConsistentRepo && story.mostConsistentRepo.regularity > 0}
 		<div class="card highlight-card">
 			<h3>Most Consistent Repository</h3>
-			<p class="repo-name">
-				<span class="text-secondary">{story.mostConsistentRepo.owner}/</span>
-				<span class="text-mono">{story.mostConsistentRepo.name}</span>
+			<p class="repo-name text-mono">
+				{story.mostConsistentRepo.name}
 			</p>
 			<p class="metric">
 				<span class="value">{Math.round(story.mostConsistentRepo.regularity * 100)}%</span>
