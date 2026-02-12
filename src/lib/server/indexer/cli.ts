@@ -32,18 +32,27 @@ async function main() {
 
 	console.log(`Syncing ${reposToSync.length} repositories...`);
 
+	let successCount = 0;
+	let failCount = 0;
+
 	for (const repo of reposToSync) {
 		try {
 			await syncRepo(repo, verbose);
+			successCount++;
 		} catch (error) {
-			console.error(`Failed to sync ${repo.owner}/${repo.name}:`, error);
+			failCount++;
+			console.error(`[ERROR] Failed to sync ${repo.owner}/${repo.name}:`, error);
 		}
 	}
 
-	console.log('\n✓ All syncs complete');
+	console.log(`\n✓ Sync complete: ${successCount} succeeded, ${failCount} failed`);
+
+	if (failCount > 0) {
+		process.exit(1);
+	}
 }
 
 main().catch((error) => {
-	console.error('Fatal error:', error);
+	console.error('[FATAL]', error);
 	process.exit(1);
 });
