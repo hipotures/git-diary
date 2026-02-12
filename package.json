@@ -10,7 +10,10 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"seed": "tsx scripts/seed.ts",
 		"index": "tsx src/lib/server/indexer/cli.ts",
-		"snapshot": "tsx scripts/generate-snapshot.ts"
+		"snapshot": "tsx scripts/generate-snapshot.ts",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage"
 	},
 	"dependencies": {
 		"better-sqlite3": "^12.6.2",
@@ -23,11 +26,13 @@
 		"@sveltejs/kit": "^2.50.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@types/better-sqlite3": "^7.6.13",
+		"@vitest/coverage-v8": "^4.0.18",
 		"drizzle-kit": "^0.31.9",
 		"svelte": "^5.50.2",
 		"svelte-check": "^4.3.6",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",
-		"vite": "^7.3.1"
+		"vite": "^7.3.1",
+		"vitest": "^4.0.18"
 	}
 }
