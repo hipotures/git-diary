@@ -37,6 +37,15 @@ export function getReposWithStats(): RepoSummary[] {
 			return result?.total ?? 0;
 		};
 
+		const getFirstCommitDate = () => {
+			const result = db
+				.select({ minDay: sql<string>`MIN(${daily.day})` })
+				.from(daily)
+				.where(and(eq(daily.repoId, r.id), sql`${daily.commits} > 0`))
+				.get();
+			return result?.minDay ?? null;
+		};
+
 		return {
 			id: r.id,
 			owner: r.owner,
@@ -47,7 +56,8 @@ export function getReposWithStats(): RepoSummary[] {
 			commits180d: countSince(day180),
 			commits360d: countSince(day360),
 			commitsAll: countAll(),
-			lastSyncAt: r.lastSyncAt
+			lastSyncAt: r.lastSyncAt,
+			firstCommitDate: getFirstCommitDate()
 		};
 	});
 }
@@ -88,9 +98,17 @@ export function getAllDailyData(days: number = 90) {
 			.orderBy(daily.day)
 			.all();
 
+		// Get first commit date from entire history, not just filtered period
+		const firstCommitResult = db
+			.select({ minDay: sql<string>`MIN(${daily.day})` })
+			.from(daily)
+			.where(and(eq(daily.repoId, r.id), sql`${daily.commits} > 0`))
+			.get();
+
 		return {
 			repo: { id: r.id, owner: r.owner, name: r.name },
-			daily: dailyData
+			daily: dailyData,
+			firstCommitDate: firstCommitResult?.minDay ?? null
 		};
 	});
 }

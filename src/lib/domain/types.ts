@@ -9,6 +9,7 @@ export interface RepoSummary {
 	commits360d: number;
 	commitsAll: number;
 	lastSyncAt: string | null;
+	firstCommitDate: string | null;
 }
 
 export interface DailyEntry {
@@ -19,6 +20,7 @@ export interface DailyEntry {
 export interface RepoDetail {
 	repo: { id: number; owner: string; name: string };
 	daily: DailyEntry[];
+	firstCommitDate: string | null;
 }
 
 export interface ComparisonRepo {
@@ -31,6 +33,7 @@ export interface ComparisonRepo {
 	maxGap: number;
 	currentStreak: number;
 	longestStreak: number;
+	firstCommitDate: string | null;
 }
 
 export interface ComparisonStats {

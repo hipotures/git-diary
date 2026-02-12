@@ -2,6 +2,7 @@ import type { ComparisonRepo } from './types.js';
 
 export type SortField =
 	| 'name'
+	| 'firstCommitDate'
 	| 'totalCommits'
 	| 'activeDays'
 	| 'regularity'
@@ -19,12 +20,23 @@ export function sortRepos(
 	const sorted = [...repos];
 
 	sorted.sort((a, b) => {
-		let aVal: number | string;
-		let bVal: number | string;
+		let aVal: number | string | null;
+		let bVal: number | string | null;
 
 		if (field === 'name') {
 			aVal = `${a.owner}/${a.name}`.toLowerCase();
 			bVal = `${b.owner}/${b.name}`.toLowerCase();
+		} else if (field === 'firstCommitDate') {
+			aVal = a.firstCommitDate;
+			bVal = b.firstCommitDate;
+
+			// Handle nulls - always sort to the end
+			if (aVal === null && bVal === null) return 0;
+			if (aVal === null) return 1;
+			if (bVal === null) return -1;
+
+			// Both non-null, compare as strings
+			return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
 		} else {
 			aVal = a[field];
 			bVal = b[field];

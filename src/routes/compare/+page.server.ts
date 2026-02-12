@@ -31,7 +31,8 @@ export const load: PageServerLoad = () => {
 				regularity: calculateRegularity(item.daily, days),
 				maxGap: calculateMaxGap(item.daily),
 				currentStreak: calculateCurrentStreak(item.daily, today),
-				longestStreak: calculateLongestStreak(item.daily)
+				longestStreak: calculateLongestStreak(item.daily),
+				firstCommitDate: item.firstCommitDate
 			};
 		})
 	};

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { Moon, Sun, RefreshCw, CheckSquare, Square, Trash2 } from 'lucide-svelte';
 	import { theme } from '$lib/stores/theme';
+	import { repoSort } from '$lib/stores/repoSort';
+	import type { RepoSortField, SortDirection } from '$lib/domain/repoSort';
 
 	interface Repo {
 		id: number;
@@ -24,6 +26,10 @@
 	let syncingRepoId = $state<number | null>(null);
 	let deletingRepoId = $state<number | null>(null);
 	let deleteConfirmRepo = $state<{ id: number; name: string } | null>(null);
+
+	// Sort preferences
+	let sortField = $state<RepoSortField>($repoSort.field);
+	let sortDirection = $state<SortDirection>($repoSort.direction);
 
 	async function syncWithGitHub() {
 		isSyncing = true;
@@ -137,6 +143,10 @@
 	function cancelDelete() {
 		deleteConfirmRepo = null;
 	}
+
+	function handleSortChange() {
+		repoSort.set({ field: sortField, direction: sortDirection });
+	}
 </script>
 
 <div class="settings-page">
@@ -172,6 +182,33 @@
 					<Sun size={20} />
 					<span>Light</span>
 				</button>
+			</div>
+		</div>
+	</section>
+
+	<!-- Repository Display Section -->
+	<section class="settings-section">
+		<h2>Repository Display</h2>
+
+		<div class="setting-item">
+			<div class="setting-info">
+				<label>Default Sort Order</label>
+				<p class="setting-description">
+					Choose how repositories are sorted on the main page by default.
+				</p>
+			</div>
+
+			<div class="sort-options">
+				<select bind:value={sortField} onchange={handleSortChange}>
+					<option value="name">Alphabetical (Name)</option>
+					<option value="firstCommitDate">First Commit Date</option>
+					<option value="totalCommits">Total Commits</option>
+				</select>
+
+				<select bind:value={sortDirection} onchange={handleSortChange}>
+					<option value="asc">Ascending</option>
+					<option value="desc">Descending</option>
+				</select>
 			</div>
 		</div>
 	</section>
@@ -403,6 +440,31 @@
 	.theme-option.active {
 		border-color: var(--color-accent);
 		background: var(--color-surface-hover);
+	}
+
+	.sort-options {
+		display: flex;
+		gap: var(--space-sm);
+	}
+
+	.sort-options select {
+		padding: var(--space-sm) var(--space-md);
+		background: var(--color-bg);
+		border: 2px solid var(--color-border);
+		border-radius: var(--radius);
+		color: var(--color-text);
+		cursor: pointer;
+		font-size: 0.875rem;
+		transition: border-color 0.2s ease;
+	}
+
+	.sort-options select:hover {
+		border-color: var(--color-text-secondary);
+	}
+
+	.sort-options select:focus {
+		outline: none;
+		border-color: var(--color-accent);
 	}
 
 	.sync-message {
