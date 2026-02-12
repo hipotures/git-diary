@@ -19,7 +19,7 @@ function aggregateByDay(commits: CommitNode[]): Map<string, number> {
 	return map;
 }
 
-export async function syncRepo(repoConfig: RepoConfig, verbose: boolean = false) {
+export async function syncRepo(repoConfig: RepoConfig, verbose: boolean = false, backfillDays: number = 30) {
 	const db = getDb();
 	const { owner, name } = repoConfig;
 
@@ -45,12 +45,12 @@ export async function syncRepo(repoConfig: RepoConfig, verbose: boolean = false)
 		}
 	}
 
-	// Determine sync window: incremental + 30-day backfill
-	const backfillDate = daysAgo(30);
+	// Determine sync window: incremental + configurable backfill
+	const backfillDate = daysAgo(backfillDays);
 	const sinceDate = repoRow.lastSyncAt && repoRow.lastSyncAt < backfillDate ? repoRow.lastSyncAt : backfillDate;
 
 	if (verbose) {
-		console.log(`[${owner}/${name}] Fetching commits since ${sinceDate.slice(0, 10)}...`);
+		console.log(`[${owner}/${name}] Fetching commits since ${sinceDate.slice(0, 10)} (backfill: ${backfillDays} days)...`);
 	}
 
 	// Fetch commits from GitHub

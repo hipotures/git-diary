@@ -9,7 +9,7 @@ Personal build diary visualizing commit activity across GitHub repositories.
 - **Comparisons** - Cross-repo rankings with regularity, streaks, and gaps analysis
 - **Story views** - Narrative summaries highlighting exceptional activity
 - **Static export** - Generate fully static HTML site for hosting anywhere
-- **Incremental sync** - Efficient GitHub GraphQL indexer with 30-day backfill
+- **Incremental sync** - Efficient GitHub GraphQL indexer with configurable backfill (default: 30 days)
 
 ## Stack
 
@@ -65,7 +65,7 @@ Open http://localhost:5173
 ### Indexer CLI
 
 ```bash
-# Sync all repositories
+# Sync all repositories (default: last 30 days)
 npm run index
 
 # Sync specific repo
@@ -73,6 +73,12 @@ npm run index -- --repo owner/name
 
 # Verbose output
 npm run index -- --verbose
+
+# Custom backfill period (e.g., 365 days for full year)
+npm run index -- --backfill-days 365
+
+# Combine options
+npm run index -- --repo owner/name --backfill-days 90 --verbose
 ```
 
 ### Static Export
