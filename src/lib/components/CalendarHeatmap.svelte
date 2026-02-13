@@ -76,8 +76,8 @@
 	const maxCommits = $derived(Math.max(...daily.map((d) => d.commits), 0));
 	const dataMap = $derived(new Map(daily.map((d) => [d.day, d.commits])));
 
-	const cellSize = $derived(bounds.numDays <= 120 ? 13 : bounds.numDays <= 260 ? 11 : 9);
-	const cellGap = $derived(bounds.numDays <= 260 ? 3 : 2);
+	const cellSize = 13;
+	const cellGap = 4;
 
 	const grid = $derived.by(() => {
 		const start = bounds.start;
@@ -92,10 +92,6 @@
 		const months: MonthLabel[] = [];
 		const seenMonthIds = new Set<string>();
 		let cursor = new Date(normalizedStart);
-
-		const firstId = `${start.getUTCFullYear()}-${start.getUTCMonth()}`;
-		months.push({ id: firstId, name: monthShort[start.getUTCMonth()], column: 0 });
-		seenMonthIds.add(firstId);
 
 		while (dayMs(cursor) <= endMs) {
 			const week: Cell[] = [];
@@ -135,8 +131,37 @@
 
 	const weekCount = $derived(grid.weeks.length);
 	const shownWeekdays = $derived(
-		weekdayNames.map((name, idx) => ({ name, show: idx === 0 || idx === 2 || idx === 4 }))
+		weekdayNames.map((name, idx) => ({ name, show: idx === 0 || idx === 2 || idx === 4 || idx === 6 }))
 	);
+
+	// Filter months to prevent overlapping labels (minimum 4 columns apart)
+	// Keep later months (actual month starts) and skip earlier ones if they conflict
+	const visibleMonths = $derived.by(() => {
+		const minColumnGap = 4;
+		const months = grid.months;
+		const visible: boolean[] = new Array(months.length).fill(true);
+
+		// Check each month against the next ones
+		for (let i = 0; i < months.length; i++) {
+			if (!visible[i]) continue;
+
+			for (let j = i + 1; j < months.length; j++) {
+				if (!visible[j]) continue;
+
+				const gap = months[j].column - months[i].column;
+				if (gap < minColumnGap) {
+					// Conflict: hide the earlier month (i), keep the later one (j)
+					visible[i] = false;
+					break;
+				} else {
+					// No more conflicts for month i
+					break;
+				}
+			}
+		}
+
+		return months.filter((_, idx) => visible[idx]);
+	});
 </script>
 
 <div class="heatmap-shell" style={`--cell-size:${cellSize}px; --cell-gap:${cellGap}px;`}>
@@ -147,7 +172,7 @@
 				class="months"
 				style={`--week-count:${weekCount}; width: calc(var(--week-count) * (var(--cell-size) + var(--cell-gap)) - var(--cell-gap));`}
 			>
-				{#each grid.months as month (month.id)}
+				{#each visibleMonths as month (month.id)}
 					<span class="month-label" style={`left: calc(${month.column} * (var(--cell-size) + var(--cell-gap)))`}>
 						{month.name}
 					</span>
@@ -182,12 +207,31 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="legend-row">
+		<span></span>
+		<div class="legend-scale">
+			<span>Less</span>
+			<div class="swatches">
+				{#each palette as color, idx}
+					<span
+						class="swatch"
+						style={`background:${idx === 0 ? emptyColor : color}; border-color:${gapColor};`}
+					></span>
+				{/each}
+			</div>
+			<span>More</span>
+		</div>
+	</div>
 </div>
 
 <style>
 	.heatmap-shell {
 		--cell-size: 13px;
-		--cell-gap: 3px;
+		--cell-gap: 4px;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
 	.calendar-wrap {
@@ -203,25 +247,26 @@
 
 	.month-row {
 		display: grid;
-		grid-template-columns: 40px 1fr;
+		grid-template-columns: 48px 1fr;
 		align-items: end;
 		margin-bottom: var(--space-xs);
 	}
 
 	.months {
 		position: relative;
-		height: 18px;
+		height: 20px;
 	}
 
 	.month-label {
 		position: absolute;
-		font-size: 0.8rem;
+		font-size: 0.88rem;
+		font-weight: 500;
 		color: var(--color-text-secondary);
 	}
 
 	.matrix-row {
 		display: grid;
-		grid-template-columns: 40px 1fr;
+		grid-template-columns: 48px 1fr;
 	}
 
 	.day-labels {
@@ -232,7 +277,7 @@
 	}
 
 	.day-label {
-		font-size: 0.74rem;
+		font-size: 0.84rem;
 		color: var(--color-text-secondary);
 		line-height: 1;
 	}
@@ -256,5 +301,41 @@
 		height: var(--cell-size);
 		border-radius: 3px;
 		border: 1px solid transparent;
+	}
+
+	.legend-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--space-md);
+		flex-wrap: wrap;
+		padding: 0 var(--space-sm) var(--space-xs);
+	}
+
+	.legend-scale {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		color: var(--color-text-secondary);
+		font-size: 0.9rem;
+	}
+
+	.swatches {
+		display: flex;
+		gap: 4px;
+	}
+
+	.swatch {
+		width: 13px;
+		height: 13px;
+		border-radius: 3px;
+		border: 1px solid transparent;
+	}
+
+	@media (max-width: 700px) {
+		.heatmap-shell {
+			--cell-size: 12px;
+			--cell-gap: 3px;
+		}
 	}
 </style>

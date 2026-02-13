@@ -85,9 +85,38 @@
 	});
 
 	const shownWeekdays = $derived(
-		weekdayNames.map((name, idx) => ({ name, show: idx === 0 || idx === 2 || idx === 4 }))
+		weekdayNames.map((name, idx) => ({ name, show: idx === 0 || idx === 2 || idx === 4 || idx === 6 }))
 	);
 	const weekCount = $derived(grid.weeks.length);
+
+	// Filter months to prevent overlapping labels (minimum 4 columns apart)
+	// Keep later months (actual month starts) and skip earlier ones if they conflict
+	const visibleMonths = $derived.by(() => {
+		const minColumnGap = 4;
+		const months = grid.months;
+		const visible: boolean[] = new Array(months.length).fill(true);
+
+		// Check each month against the next ones
+		for (let i = 0; i < months.length; i++) {
+			if (!visible[i]) continue;
+
+			for (let j = i + 1; j < months.length; j++) {
+				if (!visible[j]) continue;
+
+				const gap = months[j].column - months[i].column;
+				if (gap < minColumnGap) {
+					// Conflict: hide the earlier month (i), keep the later one (j)
+					visible[i] = false;
+					break;
+				} else {
+					// No more conflicts for month i
+					break;
+				}
+			}
+		}
+
+		return months.filter((_, idx) => visible[idx]);
+	});
 </script>
 
 <div class="heatmap-shell">
@@ -98,7 +127,7 @@
 				class="months"
 				style={`--week-count:${weekCount}; width: calc(var(--week-count) * (var(--cell-size) + var(--cell-gap)) - var(--cell-gap));`}
 			>
-				{#each grid.months as month (month.name)}
+				{#each visibleMonths as month (month.name)}
 					<span class="month-label" style={`left: calc(${month.column} * (var(--cell-size) + var(--cell-gap)))`}>
 						{month.name}
 					</span>
