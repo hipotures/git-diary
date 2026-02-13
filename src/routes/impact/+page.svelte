@@ -1,7 +1,9 @@
 <script lang="ts">
 	import MetricCard from '$lib/components/MetricCard.svelte';
+	import ImpactNetFilesChart from '$lib/components/ImpactNetFilesChart.svelte';
 	import { buildImpactView } from '$lib/domain/impact';
 	import { dateRange, getRangeLabel } from '$lib/stores/dateRange';
+	import { impactDailyPageSize } from '$lib/stores/impactPagination';
 	import { getDisplayName } from '$lib/utils/repoDisplay.js';
 	import type { PageData } from './$types.js';
 
@@ -20,8 +22,26 @@
 	let { data }: { data: PageData } = $props();
 	let sortField = $state<RepoSortField>('net');
 	let sortDirection = $state<SortDirection>('desc');
+	let dailyPage = $state(1);
 
 	const impact = $derived(buildImpactView(data.impactData, $dateRange));
+	const dailyPagination = $derived.by(() => {
+		const pageSize = $impactDailyPageSize;
+		const totalRows = impact.dailyRows.length;
+		const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+		const currentPage = Math.min(dailyPage, totalPages);
+		const start = (currentPage - 1) * pageSize;
+		const end = Math.min(start + pageSize, totalRows);
+
+		return {
+			totalRows,
+			totalPages,
+			currentPage,
+			start,
+			end,
+			rows: impact.dailyRows.slice(start, start + pageSize)
+		};
+	});
 
 	const sortedRepoRows = $derived.by(() => {
 		const rows = [...impact.repoRows];
@@ -43,6 +63,16 @@
 	});
 
 	const maxImpact = $derived(Math.max(...impact.dailyRows.map((row) => row.totalChanges), 0));
+
+	$effect(() => {
+		const totalPages = Math.max(1, Math.ceil(impact.dailyRows.length / $impactDailyPageSize));
+		dailyPage = Math.min(Math.max(1, dailyPage), totalPages);
+	});
+
+	$effect(() => {
+		$dateRange;
+		dailyPage = 1;
+	});
 
 	function handleSort(field: RepoSortField) {
 		if (sortField === field) {
@@ -70,6 +100,14 @@
 		if (sortField !== field) return '';
 		return sortDirection === 'asc' ? '↑' : '↓';
 	}
+
+	function goToPreviousDailyPage() {
+		dailyPage = Math.max(1, dailyPage - 1);
+	}
+
+	function goToNextDailyPage() {
+		dailyPage = Math.min(dailyPagination.totalPages, dailyPage + 1);
+	}
 </script>
 
 <header class="header">
@@ -87,6 +125,13 @@
 	<MetricCard label="Files Changed" value={formatInt(impact.summary.filesChanged)} />
 	<MetricCard label="Avg Lines/Commit" value={formatFloat(impact.summary.avgLinesPerCommit)} />
 	<MetricCard label="Avg Files/Commit" value={formatFloat(impact.summary.avgFilesPerCommit)} />
+</section>
+
+<section class="section">
+	<h2>LOC and Files Activity ({getRangeLabel($dateRange)})</h2>
+	<div class="chart-container">
+		<ImpactNetFilesChart daily={impact.dailyRows} range={$dateRange} />
+	</div>
 </section>
 
 <section class="section">
@@ -176,7 +221,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each impact.dailyRows as row (row.day)}
+				{#each dailyPagination.rows as row (row.day)}
 					<tr>
 						<td class="text-mono">{row.day}</td>
 						<td class="numeric">{formatInt(row.commits)}</td>
@@ -194,6 +239,32 @@
 			</tbody>
 		</table>
 	</div>
+	{#if dailyPagination.totalRows > 0}
+		<div class="table-pagination">
+			<span class="text-secondary">
+				Showing {dailyPagination.start + 1}-{dailyPagination.end} of {dailyPagination.totalRows}
+			</span>
+			<div class="pagination-controls">
+				<button
+					class="pagination-btn"
+					onclick={goToPreviousDailyPage}
+					disabled={dailyPagination.currentPage === 1}
+				>
+					Previous
+				</button>
+				<span class="text-mono pagination-status">
+					Page {dailyPagination.currentPage} / {dailyPagination.totalPages}
+				</span>
+				<button
+					class="pagination-btn"
+					onclick={goToNextDailyPage}
+					disabled={dailyPagination.currentPage === dailyPagination.totalPages}
+				>
+					Next
+				</button>
+			</div>
+		</div>
+	{/if}
 </section>
 
 <section class="section top-grid">
@@ -265,6 +336,16 @@
 		margin-bottom: var(--space-xl);
 	}
 
+	.metrics-grid :global(.metric-card) {
+		padding: var(--space-md);
+	}
+
+	.metrics-grid :global(.metric-value) {
+		font-size: 1.8rem;
+		line-height: 1.1;
+		white-space: nowrap;
+	}
+
 	.section {
 		margin-top: var(--space-xl);
 	}
@@ -282,6 +363,53 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius);
 		overflow-x: auto;
+	}
+
+	.chart-container {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		padding: var(--space-lg);
+		margin-top: var(--space-md);
+	}
+
+	.table-pagination {
+		margin-top: var(--space-sm);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-md);
+	}
+
+	.pagination-controls {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+	}
+
+	.pagination-status {
+		font-size: 0.8125rem;
+		color: var(--color-text-secondary);
+	}
+
+	.pagination-btn {
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-text);
+		border-radius: var(--radius);
+		padding: 0.325rem 0.625rem;
+		font-size: 0.8125rem;
+		cursor: pointer;
+		transition: background 0.2s ease;
+	}
+
+	.pagination-btn:hover:not(:disabled) {
+		background: var(--color-surface-hover);
+	}
+
+	.pagination-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 
 	table {

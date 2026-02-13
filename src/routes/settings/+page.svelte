@@ -2,6 +2,7 @@
 	import { Moon, Sun, RefreshCw, CheckSquare, Square, Trash2, Pencil } from 'lucide-svelte';
 	import { theme } from '$lib/stores/theme';
 	import { repoSort } from '$lib/stores/repoSort';
+	import { impactDailyPageSize, type ImpactDailyPageSize } from '$lib/stores/impactPagination';
 	import type { RepoSortField, SortDirection } from '$lib/domain/repoSort';
 
 	interface Repo {
@@ -34,6 +35,7 @@
 	// Sort preferences
 	let sortField = $state<RepoSortField>($repoSort.field);
 	let sortDirection = $state<SortDirection>($repoSort.direction);
+	let dailyPageSize = $state<ImpactDailyPageSize>($impactDailyPageSize);
 
 	async function syncWithGitHub() {
 		isSyncing = true;
@@ -198,6 +200,10 @@
 	function handleSortChange() {
 		repoSort.set({ field: sortField, direction: sortDirection });
 	}
+
+	function handleDailyPageSizeChange() {
+		impactDailyPageSize.set(dailyPageSize);
+	}
 </script>
 
 <div class="settings-page">
@@ -259,6 +265,28 @@
 				<select bind:value={sortDirection} onchange={handleSortChange}>
 					<option value="asc">Ascending</option>
 					<option value="desc">Descending</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="setting-item">
+			<div class="setting-info">
+				<label for="daily-page-size-select">Impact Daily Table Page Size</label>
+				<p class="setting-description">
+					Number of rows per page for "Daily Commit Activity with Changes".
+				</p>
+			</div>
+
+			<div class="sort-options">
+				<select
+					id="daily-page-size-select"
+					bind:value={dailyPageSize}
+					onchange={handleDailyPageSizeChange}
+				>
+					<option value={10}>10</option>
+					<option value={30}>30</option>
+					<option value={50}>50</option>
+					<option value={100}>100</option>
 				</select>
 			</div>
 		</div>
