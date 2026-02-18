@@ -151,7 +151,7 @@ Guide and CLI options:
 `.env` (optional):
 
 ```env
-DATABASE_PATH=./data/diary.db
+DATABASE_PATH=./data/gitiary.db
 ```
 
 ### Database Schema

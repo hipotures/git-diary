@@ -4,7 +4,7 @@ import { repo, daily } from '../src/lib/server/db/schema.js';
 import { resolve } from 'path';
 import { mkdirSync } from 'fs';
 
-const DB_PATH = resolve('data', 'diary.db');
+const DB_PATH = resolve('data', 'gitiary.db');
 mkdirSync(resolve('data'), { recursive: true });
 
 const sqlite = new Database(DB_PATH);
