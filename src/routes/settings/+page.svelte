@@ -721,7 +721,7 @@
 	}
 
 	.sync-message.error {
-		color: var(--color-error);
+		color: var(--color-danger);
 	}
 
 	.sync-button {
@@ -1023,7 +1023,7 @@
 	}
 
 	.modal-btn.confirm {
-		background: var(--color-error);
+		background: var(--color-danger);
 		color: white;
 	}
 
@@ -1200,7 +1200,7 @@
 	}
 
 	.emails-save-msg.error {
-		color: var(--color-error);
+		color: var(--color-danger);
 	}
 
 	.action-btn.fork-btn {

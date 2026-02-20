@@ -51,7 +51,7 @@
 
 	select:hover {
 		background: var(--color-surface-hover);
-		border-color: var(--color-border-hover);
+		border-color: var(--color-border);
 	}
 
 	select:focus {
