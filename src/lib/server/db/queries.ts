@@ -53,6 +53,15 @@ export function getReposWithStats(): RepoSummary[] {
 			return result?.minDay ?? null;
 		};
 
+		const getLastCommitDate = () => {
+			const result = db
+				.select({ maxDay: sql<string>`MAX(${daily.day})` })
+				.from(daily)
+				.where(and(eq(daily.repoId, r.id), sql`${daily.commits} > 0`))
+				.get();
+			return result?.maxDay ?? null;
+		};
+
 		return {
 			id: r.id,
 			owner: r.owner,
@@ -66,7 +75,8 @@ export function getReposWithStats(): RepoSummary[] {
 			commits360d: countSince(day360),
 			commitsAll: countAll(),
 			lastSyncAt: r.lastSyncAt,
-			firstCommitDate: getFirstCommitDate()
+			firstCommitDate: getFirstCommitDate(),
+			lastCommitDate: getLastCommitDate()
 		};
 	});
 }

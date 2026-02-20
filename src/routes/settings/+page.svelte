@@ -326,6 +326,7 @@
 					<option value="name">Alphabetical (Name)</option>
 					<option value="firstCommitDate">First Commit Date</option>
 					<option value="totalCommits">Total Commits</option>
+					<option value="lastCommitDate">Last Active</option>
 				</select>
 
 				<select bind:value={sortDirection} onchange={handleSortChange}>

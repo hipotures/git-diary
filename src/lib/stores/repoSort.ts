@@ -26,7 +26,7 @@ const getInitialPreference = (): RepoSortPreference => {
 		if (
 			parsed &&
 			typeof parsed === 'object' &&
-			['name', 'firstCommitDate', 'totalCommits'].includes(parsed.field) &&
+			['name', 'firstCommitDate', 'totalCommits', 'lastCommitDate'].includes(parsed.field) &&
 			['asc', 'desc'].includes(parsed.direction)
 		) {
 			return parsed as RepoSortPreference;

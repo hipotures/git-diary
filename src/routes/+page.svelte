@@ -57,6 +57,12 @@
 					<span class="sort-indicator">{effectiveSortDirection === 'asc' ? '↑' : '↓'}</span>
 				{/if}
 			</button>
+			<button class="sort-btn" onclick={() => handleSort('lastCommitDate')}>
+				Last Active
+				{#if effectiveSortField === 'lastCommitDate'}
+					<span class="sort-indicator">{effectiveSortDirection === 'asc' ? '↑' : '↓'}</span>
+				{/if}
+			</button>
 		</div>
 	</div>
 

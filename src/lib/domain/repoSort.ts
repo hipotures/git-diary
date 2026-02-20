@@ -1,6 +1,6 @@
 import type { RepoSummary } from './types.js';
 
-export type RepoSortField = 'name' | 'firstCommitDate' | 'totalCommits';
+export type RepoSortField = 'name' | 'firstCommitDate' | 'totalCommits' | 'lastCommitDate';
 export type SortDirection = 'asc' | 'desc';
 
 /**
@@ -40,6 +40,19 @@ export function sortRepoSummaries(
 
 			case 'totalCommits': {
 				comparison = a.commitsAll - b.commitsAll;
+				break;
+			}
+
+			case 'lastCommitDate': {
+				if (a.lastCommitDate === null && b.lastCommitDate === null) {
+					comparison = 0;
+				} else if (a.lastCommitDate === null) {
+					comparison = 1;
+				} else if (b.lastCommitDate === null) {
+					comparison = -1;
+				} else {
+					comparison = a.lastCommitDate.localeCompare(b.lastCommitDate);
+				}
 				break;
 			}
 		}

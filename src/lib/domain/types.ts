@@ -12,6 +12,7 @@ export interface RepoSummary {
 	commitsAll: number;
 	lastSyncAt: string | null;
 	firstCommitDate: string | null;
+	lastCommitDate: string | null;
 }
 
 export interface DailyEntry {
