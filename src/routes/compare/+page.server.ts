@@ -1,6 +1,5 @@
 import { getAllDailyData } from '$lib/server/db/queries.js';
 import {
-	calculateCurrentStreak,
 	calculateLongestStreak,
 	calculateMaxGap,
 	calculateRegularity
@@ -14,7 +13,6 @@ export const load: PageServerLoad = () => {
 	const days = 360;
 
 	const allData = getAllDailyData(days);
-	const today = new Date().toISOString().slice(0, 10);
 
 	const stats: ComparisonStats = {
 		period,
@@ -31,10 +29,10 @@ export const load: PageServerLoad = () => {
 				activeDays,
 				regularity: calculateRegularity(item.daily, days),
 				maxGap: calculateMaxGap(item.daily),
-				currentStreak: calculateCurrentStreak(item.daily, today),
 				longestStreak: calculateLongestStreak(item.daily),
 				firstCommitDate: item.firstCommitDate,
-				lastCommitDate: item.lastCommitDate
+				lastCommitDate: item.lastCommitDate,
+				netLoc: item.netLoc
 			};
 		})
 	};

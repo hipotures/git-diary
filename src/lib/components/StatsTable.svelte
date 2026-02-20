@@ -85,9 +85,9 @@
 					</button>
 				</th>
 				<th class="numeric">
-					<button class="sort-btn" onclick={() => handleSort('currentStreak')}>
-						Current Streak
-						{#if sortField === 'currentStreak'}
+					<button class="sort-btn" onclick={() => handleSort('netLoc')}>
+						LOC
+						{#if sortField === 'netLoc'}
 							<span class="sort-indicator">{sortDirection === 'asc' ? '↑' : '↓'}</span>
 						{/if}
 					</button>
@@ -116,7 +116,7 @@
 					<td class="numeric">{repo.activeDays}</td>
 					<td class="numeric">{formatPercent(repo.regularity)}</td>
 					<td class="numeric">{repo.maxGap}d</td>
-					<td class="numeric">{repo.currentStreak}d</td>
+					<td class="numeric">{repo.netLoc.toLocaleString()}</td>
 					<td class="numeric">{repo.longestStreak}d</td>
 				</tr>
 			{/each}

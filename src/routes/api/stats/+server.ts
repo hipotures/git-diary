@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { getAllDailyData } from '$lib/server/db/queries.js';
 import {
-	calculateCurrentStreak,
 	calculateLongestStreak,
 	calculateMaxGap,
 	calculateRegularity
@@ -14,7 +13,6 @@ export const GET: RequestHandler = () => {
 	const days = 360;
 
 	const allData = getAllDailyData(days);
-	const today = new Date().toISOString().slice(0, 10);
 
 	const stats: ComparisonStats = {
 		period,
@@ -31,9 +29,10 @@ export const GET: RequestHandler = () => {
 				activeDays,
 				regularity: calculateRegularity(item.daily, days),
 				maxGap: calculateMaxGap(item.daily),
-				currentStreak: calculateCurrentStreak(item.daily, today),
 				longestStreak: calculateLongestStreak(item.daily),
-				firstCommitDate: item.firstCommitDate
+				firstCommitDate: item.firstCommitDate,
+				lastCommitDate: item.lastCommitDate,
+				netLoc: item.netLoc
 			};
 		})
 	};

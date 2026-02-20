@@ -41,10 +41,10 @@ export interface ComparisonRepo {
 	activeDays: number;
 	regularity: number;
 	maxGap: number;
-	currentStreak: number;
 	longestStreak: number;
 	firstCommitDate: string | null;
 	lastCommitDate: string | null;
+	netLoc: number;
 }
 
 export interface ComparisonStats {

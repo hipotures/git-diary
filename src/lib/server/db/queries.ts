@@ -130,11 +130,21 @@ export function getAllDailyData(days: number = 90) {
 			.where(and(eq(daily.repoId, r.id), sql`${daily.commits} > 0`))
 			.get();
 
+		// Net LOC = sum of (additions - deletions) for the filtered period
+		const netLocResult = db
+			.select({
+				net: sql<number>`cast(coalesce(sum(${daily.additions}) - sum(${daily.deletions}), 0) as integer)`
+			})
+			.from(daily)
+			.where(and(eq(daily.repoId, r.id), gte(daily.day, since)))
+			.get();
+
 		return {
 			repo: { id: r.id, owner: r.owner, name: r.name, displayName: r.displayName },
 			daily: dailyData,
 			firstCommitDate: firstLastResult?.minDay ?? null,
-			lastCommitDate: firstLastResult?.maxDay ?? null
+			lastCommitDate: firstLastResult?.maxDay ?? null,
+			netLoc: netLocResult?.net ?? 0
 		};
 	});
 }

@@ -8,7 +8,7 @@ export type SortField =
 	| 'activeDays'
 	| 'regularity'
 	| 'maxGap'
-	| 'currentStreak'
+	| 'netLoc'
 	| 'longestStreak';
 
 export type SortDirection = 'asc' | 'desc';

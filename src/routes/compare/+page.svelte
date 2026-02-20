@@ -3,7 +3,6 @@
 	import MetricCard from '$lib/components/MetricCard.svelte';
 	import { dateRange, filterDailyData, getRangeLabel, getDaysFromRange } from '$lib/stores/dateRange';
 	import {
-		calculateCurrentStreak,
 		calculateLongestStreak,
 		calculateMaxGap,
 		calculateRegularity
@@ -15,7 +14,6 @@
 
 	// Recalculate stats based on selected date range
 	const filteredStats = $derived.by(() => {
-		const today = new Date().toISOString().slice(0, 10);
 		const days = getDaysFromRange($dateRange) || 360;
 
 		const stats: ComparisonStats = {
@@ -34,10 +32,10 @@
 					activeDays,
 					regularity: calculateRegularity(filteredDaily, days),
 					maxGap: calculateMaxGap(filteredDaily),
-					currentStreak: calculateCurrentStreak(filteredDaily, today),
 					longestStreak: calculateLongestStreak(filteredDaily),
 					firstCommitDate: item.firstCommitDate,
-					lastCommitDate: item.lastCommitDate
+					lastCommitDate: item.lastCommitDate,
+					netLoc: item.netLoc
 				};
 			})
 		};
