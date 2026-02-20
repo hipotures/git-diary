@@ -71,9 +71,6 @@
 		opacity: 0.75;
 	}
 
-	.fork-badge :global(svg) {
-		display: block;
-	}
 
 	.back-link {
 		font-size: 0.875rem;
