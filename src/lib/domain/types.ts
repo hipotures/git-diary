@@ -12,6 +12,7 @@ export interface RepoSummary {
 	commits360d: number;
 	commitsAll: number;
 	lastSyncAt: string | null;
+	lastPushedAt: string | null;
 	firstCommitDate: string | null;
 	lastCommitDate: string | null;
 }

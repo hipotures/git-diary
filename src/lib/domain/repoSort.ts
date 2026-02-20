@@ -52,6 +52,11 @@ export function sortRepoSummaries(
 					comparison = -1;
 				} else {
 					comparison = a.lastCommitDate.localeCompare(b.lastCommitDate);
+					if (comparison === 0) {
+						const aPushed = a.lastPushedAt ?? '';
+						const bPushed = b.lastPushedAt ?? '';
+						comparison = aPushed.localeCompare(bPushed);
+					}
 				}
 				break;
 			}

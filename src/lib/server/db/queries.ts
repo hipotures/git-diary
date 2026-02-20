@@ -76,6 +76,7 @@ export function getReposWithStats(): RepoSummary[] {
 			commits360d: countSince(day360),
 			commitsAll: countAll(),
 			lastSyncAt: r.lastSyncAt,
+			lastPushedAt: r.lastPushedAt,
 			firstCommitDate: getFirstCommitDate(),
 			lastCommitDate: getLastCommitDate()
 		};
